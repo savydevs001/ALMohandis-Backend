@@ -1,0 +1,41 @@
+{
+  "name": "boilerplate__typescript-express-vercel",
+  "version": "1.0.0",
+  "description": "Typescript & ExpressJS, deploy on Vercel",
+  "main": "src/app.ts",
+  "scripts": {
+    "start": "node build/app.js",
+    "dev": "ts-node-dev --respawn src/app.ts",
+    "build": "npm run clean && tsc && npm run copy-assets",
+    "copy-assets": "ts-node tools/copyAssets",
+    "clean": "rimraf build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/edwintantawi/boilerplate__typescript-express-vercel.git"
+  },
+  "keywords": [],
+  "author": "edwintantawi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/edwintantawi/boilerplate__typescript-express-vercel/issues"
+  },
+  "homepage": "https://github.com/edwintantawi/boilerplate__typescript-express-vercel#readme",
+  "dependencies": {
+    "@prisma/client": "^5.20.0",
+    "ejs": "^3.1.6",
+    "express": "^4.21.1",
+    "prisma": "^5.20.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^16.18.113",
+    "@types/shelljs": "^0.8.9",
+    "rimraf": "^3.0.2",
+    "shelljs": "^0.8.4",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^1.1.8",
+    "typescript": "^5.6.3"
+  }
+}

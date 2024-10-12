@@ -1,0 +1,28 @@
+// schema.prisma
+
+datasource db {
+  provider = "postgresql" 
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id             Int      @id @default(autoincrement())
+  phoneNumber    String   @unique
+  userType       UserType
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+enum UserType {
+  STUDENT
+  PARENT
+  TEACHER
+  ASSISTANT
+  ADMIN
+}
+
+
