@@ -1,6 +1,4 @@
-// types.ts
 
-// Enums corresponding to Prisma enums
 export enum UserRole {
   TEACHER = "TEACHER",
   STUDENT = "STUDENT",

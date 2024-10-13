@@ -1,13 +1,21 @@
-import path from 'path';
+// src/index.ts
 import express from 'express';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+// import userRoutes from './routes/userRoutes';
+import courseRoutes from '../src/routes/course/course';
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
-app.get("/health", (req, res) => {
-  res.send("All System is running");
+// Middleware
+app.use(cors());
+app.use(bodyParser.json());
+
+// Routes
+// app.use('/api/users', userRoutes);
+app.use('/api/courses', courseRoutes);
+
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
-
-app.listen(PORT, () =>
-  console.log(`server running in http://localhost:${PORT}`)
-);
