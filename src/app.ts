@@ -24,6 +24,10 @@ app.use('/api/courses', courseRoutes);
 // Admin User Management Routes -- teacher
  app.use('/api/admin', AdminControlTeacher);
 
+app.get("/", (req, res) => {
+  res.send("All Systems are running");
+} );
+
 
  app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
