@@ -44,6 +44,8 @@ model Course {
   title            String
   description      String
   isFree           Boolean                @default(false)
+  isActive         Boolean                @default(false)  // approved by admin
+  isDraft          Boolean                @default(true)   // not published yet
   accessibility    AccessibilitySettings? @relation("CourseAccessibility")
   objectives       String[]
   parts            Part[]
@@ -53,6 +55,7 @@ model Course {
   purchasedCourses CoursesPurchased[]
   groups           Group[]                @relation("GroupCourse")
   enrolledUsers    User[]                 @relation("EnrolledCourses")
+  
 }
 
 enum Gender {

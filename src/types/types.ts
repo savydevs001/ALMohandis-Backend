@@ -51,6 +51,8 @@ export interface Course {
   title: string;
   description: string;
   isFree: boolean;
+  isActive : boolean;
+  isDraft : boolean;
   accessibility?: AccessibilitySettings; // Optional relation
   objectives: string[];
   parts: Part[];
@@ -150,4 +152,115 @@ export interface Group {
   title: string;
   courses: Course[]; // Relation: GroupCourse
   accessibilitySettings: AccessibilitySettings[]; // Relation: AccessibilityGroups
+}
+
+export enum Gender {
+  MALE = 'MALE',
+  FEMALE = 'FEMALE',
+}
+
+
+
+export interface AccessibilitySettings {
+  id: string;
+  courseId: string;
+  studentAccessType: StudentAccessType;
+  academicStage: number;
+  canAccessIfPurchased: boolean;
+}
+
+export interface Part {
+  id: string;
+  title: string;
+  price: number;
+  completionTime: number; // in hours
+  openingDate: Date;
+  courseId: string;
+}
+
+export interface Module {
+  id: string;
+  type: ModuleType;
+  partId: string;
+  courseId: string;
+}
+
+export interface Lesson {
+  id: string;
+  title: string;
+  videoUrl?: string;
+  audioUrl?: string;
+  moduleId: string;
+  isPromotional: boolean;
+}
+
+export interface Question {
+  id: string;
+  questionText: string;
+  answerType: AnswerType;
+  options: string[];
+  correctAnswer: string;
+  assignmentId?: string;
+  examId?: string;
+  moduleId?: string;
+}
+
+export interface Attachment {
+  id: string;
+  fileType: string;
+  fileUrl: string;
+  description: string;
+  moduleId: string;
+}
+
+// Request Body Interfaces
+export interface CreateCourseInput {
+  title: string;
+  description: string;
+  isFree: boolean;
+  objectives: string[];
+  instructorId: string;
+}
+
+export interface UpdateCourseInput {
+  title?: string;
+  description?: string;
+  isFree?: boolean;
+  objectives?: string[];
+}
+
+export interface UpdateAccessibilitySettingsInput {
+  studentAccessType: StudentAccessType;
+  academicStage: number;
+  canAccessIfPurchased: boolean;
+}
+
+export interface AddCourseObjectivesInput {
+  objectives: string[];
+}
+
+export interface AddCoursePartInput {
+  title: string;
+  price: number;
+  completionTime: number;
+  openingDate: string; // ISO string
+}
+
+export interface AddModuleToPartInput {
+  type: ModuleType;
+}
+
+export interface AddLessonToModuleInput {
+  title: string;
+  videoUrl?: string;
+  audioUrl?: string;
+  isPromotional?: boolean;
+}
+
+export interface AddQuestionsToModuleInput {
+  questions: Omit<Question, 'id' | 'assignmentId' | 'examId' | 'moduleId'>[];
+}
+
+export interface AddAttachmentsToModuleInput {
+  attachments: Omit<Attachment, 'id'>[];
 }
