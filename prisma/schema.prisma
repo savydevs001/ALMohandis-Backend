@@ -1,150 +1,175 @@
-// types.ts
-
-// Enums corresponding to Prisma enums
-export enum UserRole {
-  TEACHER = "TEACHER",
-  STUDENT = "STUDENT",
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-export enum StudentAccessType {
-  INTERNAL = "INTERNAL",
-  EXTERNAL = "EXTERNAL",
+generator client {
+  provider = "prisma-client-js"
 }
 
-export enum ModuleType {
-  CHAPTER = "CHAPTER",
-  EXAM = "EXAM",
-  ASSIGNMENT = "ASSIGNMENT",
-  ATTACHMENT = "ATTACHMENT",
+model User {
+  id               String             @id @default(cuid())
+  email            String             @unique
+  password         String
+  role             UserRole // TEACHER or STUDENT
+  purchasedCourses CoursesPurchased[]
+  enrolledCourses  Course[]           @relation("EnrolledCourses")
 }
 
-export enum AnswerType {
-  MCQ = "MCQ",
-  TRUE_FALSE = "TRUE_FALSE",
-  SHORT_ANSWER = "SHORT_ANSWER",
+model Teacher {
+  id          String   @id @default(cuid())
+  fullName    String
+  gender      Gender
+  joiningDate DateTime
+  email       String   @unique
+  password    String
+  dateOfBirth DateTime
+  phone       String
+  department  String
+  level       Int
+  experience  Int
+  courses     Course[] @relation("TeacherCourses")
 }
 
-// Interfaces corresponding to Prisma models
-
-export interface User {
-  id: string;
-  email: string;
-  password: string;
-  role: UserRole;
-  courses: Course[]; // Relation: CourseInstructor
-  purchasedCourses: CoursesPurchased[];
+model CoursesPurchased {
+  id       String @id @default(cuid())
+  userId   String
+  courseId String
+  user     User   @relation(fields: [userId], references: [id])
+  course   Course @relation(fields: [courseId], references: [id])
 }
 
-export interface CoursesPurchased {
-  id: string;
-  userId: string;
-  courseId: string;
-  user: User;
-  course: Course;
+model Course {
+  id               String                 @id @default(cuid())
+  title            String
+  description      String
+  isFree           Boolean                @default(false)
+  accessibility    AccessibilitySettings? @relation("CourseAccessibility")
+  objectives       String[]
+  parts            Part[]
+  modules          Module[]               @relation("CourseModules")
+  instructorId     String
+  instructor       Teacher                @relation("TeacherCourses", fields: [instructorId], references: [id])
+  purchasedCourses CoursesPurchased[]
+  groups           Group[]                @relation("GroupCourse")
+  enrolledUsers    User[]                 @relation("EnrolledCourses")
 }
 
-export interface Course {
-  id: string;
-  title: string;
-  description: string;
-  isFree: boolean;
-  accessibility?: AccessibilitySettings; // Optional relation
-  objectives: string[];
-  parts: Part[];
-  modules: Module[];
-  instructorId: string;
-  instructor: User; // Relation: CourseInstructor
-  purchasedCourses: CoursesPurchased[];
-  groups: Group[];
+enum Gender {
+  MALE
+  FEMALE
 }
 
-export interface AccessibilitySettings {
-  id: string;
-  courseId: string;
-  course: Course; // Relation: CourseAccessibility
-  studentAccessType: StudentAccessType;
-  academicStage: number; // 1, 2, 3, 4 for stages
-  canAccessIfPurchased: boolean;
-  groups: Group[]; // Relation: AccessibilityGroups
+model AccessibilitySettings {
+  id                   String            @id @default(cuid())
+  courseId             String            @unique
+  course               Course            @relation("CourseAccessibility", fields: [courseId], references: [id])
+  studentAccessType    StudentAccessType
+  academicStage        Int // 1, 2, 3, 4 for stages
+  canAccessIfPurchased Boolean           @default(false)
+  groups               Group[]           @relation("AccessibilityGroups")
 }
 
-export interface Part {
-  id: string;
-  title: string;
-  price: number;
-  completionTime: number; // Ideal time to complete the part in hours
-  openingDate: Date;
-  courseId: string;
-  course: Course;
-  modules: Module[];
+model Part {
+  id             String   @id @default(cuid())
+  title          String
+  price          Float
+  completionTime Int // Ideal time to complete the part in hours
+  openingDate    DateTime
+  courseId       String
+  course         Course   @relation(fields: [courseId], references: [id])
+  modules        Module[]
 }
 
-export interface Module {
-  id: string;
-  type: ModuleType;
-  partId: string;
-  part: Part;
-  courseId: string;
-  course: Course; // Relation: CourseModules
-  lessons: Lesson[];
-  questions: Question[];
-  attachments: Attachment[];
-  assignments: Assignment[]; // Relation: ModuleAssignments
-  exams: Exam[]; // Relation: ModuleExams
+model Module {
+  id          String       @id @default(cuid())
+  type        ModuleType // Enum for Chapter, Exam, Assignment, Attachment
+  partId      String
+  part        Part         @relation(fields: [partId], references: [id])
+  courseId    String
+  course      Course       @relation("CourseModules", fields: [courseId], references: [id])
+  lessons     Lesson[]
+  questions   Question[]
+  attachments Attachment[]
+  assignments Assignment[] @relation("ModuleAssignments")
+  exams       Exam[]       @relation("ModuleExams")
 }
 
-export interface Lesson {
-  id: string;
-  title: string;
-  videoUrl?: string; // Optional, if video is present
-  audioUrl?: string; // Optional, if audio is present
-  moduleId: string;
-  module: Module;
-  isPromotional: boolean;
+model Lesson {
+  id            String  @id @default(cuid())
+  title         String
+  videoUrl      String? // Optional, if video is present
+  audioUrl      String? // Optional, if audio is present
+  moduleId      String
+  module        Module  @relation(fields: [moduleId], references: [id])
+  isPromotional Boolean @default(false)
 }
 
-export interface Assignment {
-  id: string;
-  title: string;
-  questions: Question[];
-  moduleId: string;
-  module: Module; // Relation: ModuleAssignments
+model Assignment {
+  id        String     @id @default(cuid())
+  title     String
+  questions Question[]
+  moduleId  String
+  module    Module     @relation("ModuleAssignments", fields: [moduleId], references: [id])
 }
 
-export interface Exam {
-  id: string;
-  title: string;
-  questions: Question[];
-  moduleId: string;
-  module: Module; // Relation: ModuleExams
+model Exam {
+  id        String     @id @default(cuid())
+  title     String
+  questions Question[]
+  moduleId  String
+  module    Module     @relation("ModuleExams", fields: [moduleId], references: [id])
 }
 
-export interface Question {
-  id: string;
-  questionText: string;
-  answerType: AnswerType;
-  options: string[]; // Non-optional array of strings
-  correctAnswer: string;
-  assignmentId?: string;
-  examId?: string;
-  moduleId?: string;
-  assignment?: Assignment;
-  exam?: Exam;
-  module?: Module;
+model Question {
+  id            String      @id @default(cuid())
+  questionText  String
+  answerType    AnswerType // Enum for MCQ, trueFalse, shortAnswer
+  options       String[] // Make it non-optional
+  correctAnswer String
+  assignmentId  String?
+  examId        String?
+  moduleId      String?
+  assignment    Assignment? @relation(fields: [assignmentId], references: [id])
+  exam          Exam?       @relation(fields: [examId], references: [id])
+  module        Module?     @relation(fields: [moduleId], references: [id])
 }
 
-export interface Attachment {
-  id: string;
-  fileType: string;
-  fileUrl: string;
-  description: string;
-  moduleId: string;
-  module: Module;
+model Attachment {
+  id          String @id @default(cuid())
+  fileType    String
+  fileUrl     String
+  description String
+  moduleId    String
+  module      Module @relation(fields: [moduleId], references: [id])
 }
 
-export interface Group {
-  id: string;
-  title: string;
-  courses: Course[]; // Relation: GroupCourse
-  accessibilitySettings: AccessibilitySettings[]; // Relation: AccessibilityGroups
+model Group {
+  id                    String                  @id @default(cuid())
+  title                 String
+  courses               Course[]                @relation("GroupCourse")
+  accessibilitySettings AccessibilitySettings[] @relation("AccessibilityGroups")
+}
+
+enum UserRole {
+  TEACHER
+  STUDENT
+}
+
+enum StudentAccessType {
+  INTERNAL
+  EXTERNAL
+}
+
+enum ModuleType {
+  CHAPTER
+  EXAM
+  ASSIGNMENT
+  ATTACHMENT
+}
+
+enum AnswerType {
+  MCQ
+  TRUE_FALSE
+  SHORT_ANSWER
 }

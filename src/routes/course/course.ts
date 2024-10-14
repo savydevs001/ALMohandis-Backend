@@ -17,7 +17,7 @@ router.post('/', createCourse); // Create a new course
 router.post('/:courseId/accessibility', updateAccessibilitySettings); // Update accessibility settings
 router.post('/:courseId/objectives', addCourseObjectives); // Add course objectives
 router.post('/:courseId/parts', addCourseParts); // Add course parts
-router.post('/:courseId/parts/:partId/modules', addModuleToPart); // Add modules to a part
+router.post('/:courseId/parts/:partId/modules', addModuleToPart); // Add modules to a part 
 router.post('/:courseId/parts/:partId/modules/:moduleId/lessons', addLessonToModule); // Add lessons to a module
 router.post('/:courseId/parts/:partId/modules/:moduleId/questions', addQuestionsToModule); // Add questions to module
 router.post('/:courseId/parts/:partId/modules/:moduleId/attachments', addAttachmentsToModule); // Add attachments to module 

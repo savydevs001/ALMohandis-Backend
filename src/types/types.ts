@@ -40,6 +40,11 @@ export interface CoursesPurchased {
   user: User;
   course: Course;
 }
+export interface Teacher{
+  id: string;
+  fullName: string;
+  
+}
 
 export interface Course {
   id: string;

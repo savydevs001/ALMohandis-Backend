@@ -1,21 +1,31 @@
-// src/index.ts
 import express from 'express';
-import bodyParser from 'body-parser';
 import cors from 'cors';
-// import userRoutes from './routes/userRoutes';
+import AdminControlTeacher from "./routes/admin/managment/teacher"
 import courseRoutes from '../src/routes/course/course';
+import cookieParser from "cookie-parser";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
-app.use(bodyParser.json());
+app.use(cookieParser());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(
+  cors({
+    origin: "*",
+    credentials: true,
+  })
+); 
 
-// Routes
-// app.use('/api/users', userRoutes);
+// Teacher Creates Course Routes
 app.use('/api/courses', courseRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+// Admin User Management Routes -- teacher
+ app.use('/api/admin', AdminControlTeacher);
+
+
+ app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
+
