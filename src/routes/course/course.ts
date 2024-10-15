@@ -10,16 +10,13 @@ import {
   updateCourseObjective,
   addCourseParts,
   updateCoursePart,
-  addModuleToPart,
-  updateModuleInPart,
-  addLessonToModule,
-  updateLessonInModule,
-  addQuestionsToModule,
-  updateQuestionsInModule,
-  addAttachmentsToModule,
-  updateAttachmentsInModule,
+  addChapterModule,
+  addExamModule,
+  addAssignmentModule,
+  addAttachmentModule,
+  sendforReview
 } from '../../controllers/course/course';
-import { protect, admin } from '../../middlware/auth'; 
+import { protect} from '../../middlware/auth'; 
 
 const router = Router();
 
@@ -29,15 +26,14 @@ const router = Router();
 
 // Create a new course
 router.post(
-  '/',
-  // Optionally, add validation middlewares here
+  '/create',
+  protect,
   createCourse
 );
 
 // Get a specific course
 router.get(
   '/:courseId',
-
   getCourse
 );
 
@@ -62,7 +58,6 @@ router.delete(
 // Update or create accessibility settings
 router.patch(
   '/:courseId/accessibility',
-
   updateAccessibilitySettings
 );
 
@@ -89,7 +84,7 @@ router.patch(
 
 // Add course parts
 router.post(
-  '/:courseId/parts',
+  '/:courseId/createPart',
   addCourseParts
 );
 
@@ -100,66 +95,17 @@ router.patch(
 );
 
 // -----------------------
-// Modules Routes
+// Modules Related Routes
 // -----------------------
 
-// Add modules to a part
-router.post(
-  '/:courseId/parts/:partId/modules',
-  addModuleToPart
-);
+router.post('/:courseId/parts/:partId/modules/chapter', addChapterModule);
+router.post('/:courseId/parts/:partId/modules/exam', addExamModule);
+router.post('/:courseId/parts/:partId/modules/assignment', addAssignmentModule);
+router.post('/:courseId/parts/:partId/modules/attachment', addAttachmentModule);
 
-// Update a specific module in a part
-router.patch(
-  '/:courseId/parts/:partId/modules/:moduleId',
-  updateModuleInPart
-);
+// send for Review
+router.post('/:courseId/send-for-review', sendforReview);
 
-// -----------------------
-// Lessons Routes
-// -----------------------
 
-// Add lessons to a module
-router.post(
-  '/:courseId/parts/:partId/modules/:moduleId/lessons',
-  addLessonToModule
-);
-
-// Update a specific lesson in a module
-router.patch(
-  '/:courseId/parts/:partId/modules/:moduleId/lessons/:lessonId',
-  updateLessonInModule
-);
-
-// -----------------------
-// Questions Routes
-// -----------------------
-
-// Add questions to a module
-router.post(
-  '/:courseId/parts/:partId/modules/:moduleId/questions',
-  addQuestionsToModule
-);
-
-// Update a specific question in a module
-router.patch(
-  '/:courseId/parts/:partId/modules/:moduleId/questions/:questionId',
-  updateQuestionsInModule
-);
-
-// -----------------------
-// Attachments Routes
-// -----------------------
-
-// Add attachments to a module
-router.post(
-  '/:courseId/parts/:partId/modules/:moduleId/attachments',
-  addAttachmentsToModule
-);
-
-// Update a specific attachment in a module
-router.patch(
-  '/:courseId/parts/:partId/modules/:moduleId/attachments/:attachmentId',
-)
 
 export default router;

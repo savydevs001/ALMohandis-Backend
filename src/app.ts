@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import AdminControlTeacher from "./routes/admin/managment/teacher"
 import courseRoutes from './routes/course/course';
+import authRoutes from "./routes/auth/auth"
 import cookieParser from "cookie-parser";
 
 
@@ -21,6 +22,8 @@ app.use(
 
 // Teacher Creates Course Routes
 app.use('/api/courses', courseRoutes);
+
+app.use('/api/auth',authRoutes);
 
 // Admin User Management Routes -- teacher
  app.use('/api/admin', AdminControlTeacher);

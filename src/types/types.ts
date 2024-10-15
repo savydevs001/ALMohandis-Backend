@@ -15,6 +15,10 @@ export enum ModuleType {
   ASSIGNMENT = "ASSIGNMENT",
   ATTACHMENT = "ATTACHMENT",
 }
+export enum LessonType {
+ AUDIO = "AUDIO",
+  VIDEO = "VIDEO",
+}
 
 export enum AnswerType {
   MCQ = "MCQ",
@@ -53,8 +57,9 @@ export interface Course {
   isFree: boolean;
   isActive : boolean;
   isDraft : boolean;
+  whatYouWillLearn:string
   accessibility?: AccessibilitySettings; // Optional relation
-  objectives: string[];
+  objectives: string;
   parts: Part[];
   modules: Module[];
   instructorId: string;
@@ -218,7 +223,7 @@ export interface CreateCourseInput {
   title: string;
   description: string;
   isFree: boolean;
-  objectives: string[];
+  objectives: string;
   instructorId: string;
 }
 
@@ -226,18 +231,17 @@ export interface UpdateCourseInput {
   title?: string;
   description?: string;
   isFree?: boolean;
-  objectives?: string[];
+  objectives?: string;
 }
 
 export interface UpdateAccessibilitySettingsInput {
   studentAccessType: StudentAccessType;
   academicStage: number;
   canAccessIfPurchased: boolean;
+  isFree: boolean;
 }
 
-export interface AddCourseObjectivesInput {
-  objectives: string[];
-}
+
 
 export interface AddCoursePartInput {
   title: string;
@@ -250,10 +254,13 @@ export interface AddModuleToPartInput {
   type: ModuleType;
 }
 
+
+
 export interface AddLessonToModuleInput {
   title: string;
-  videoUrl?: string;
-  audioUrl?: string;
+  srcUrl?: string;
+  description: string;
+  type: LessonType;
   isPromotional?: boolean;
 }
 

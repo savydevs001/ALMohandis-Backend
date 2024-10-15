@@ -46,8 +46,10 @@ model Course {
   isFree           Boolean                @default(false)
   isActive         Boolean                @default(false)  // approved by admin
   isDraft          Boolean                @default(true)   // not published yet
+  waitingForReview Boolean @default(false)
   accessibility    AccessibilitySettings? @relation("CourseAccessibility")
-  objectives       String[]
+  objectives       String?
+  whatYouWillLearn String?
   parts            Part[]
   modules          Module[]               @relation("CourseModules")
   instructorId     String
@@ -86,7 +88,7 @@ model Part {
 
 model Module {
   id          String       @id @default(cuid())
-  type        ModuleType // Enum for Chapter, Exam, Assignment, Attachment
+  type        ModuleType   // Enum for Chapter, Exam, Assignment, Attachment
   partId      String
   part        Part         @relation(fields: [partId], references: [id])
   courseId    String
@@ -99,14 +101,25 @@ model Module {
 }
 
 model Lesson {
-  id            String  @id @default(cuid())
+  id            String    @id @default(cuid())
   title         String
-  videoUrl      String? // Optional, if video is present
-  audioUrl      String? // Optional, if audio is present
+  description   String
+  type          LessonType
+  srcUrl        String
   moduleId      String
-  module        Module  @relation(fields: [moduleId], references: [id])
-  isPromotional Boolean @default(false)
+  module        Module    @relation(fields: [moduleId], references: [id])
+  isPromotional Boolean   @default(false)
+  clips         Clip[]
 }
+model Clip {
+  id        String @id @default(cuid())
+  title     String
+  start Int   
+  end Int    
+  lessonId  String
+  lesson    Lesson @relation(fields: [lessonId], references: [id])
+}
+
 
 model Assignment {
   id        String     @id @default(cuid())
@@ -176,3 +189,9 @@ enum AnswerType {
   TRUE_FALSE
   SHORT_ANSWER
 }
+
+enum LessonType {
+  AUDIO
+  VIDEO
+}
+
