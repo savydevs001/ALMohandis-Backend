@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "Course" ADD COLUMN     "isActive" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "isDraft" BOOLEAN NOT NULL DEFAULT true;

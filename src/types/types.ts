@@ -71,11 +71,11 @@ export interface Course {
 export interface AccessibilitySettings {
   id: string;
   courseId: string;
-  course: Course; // Relation: CourseAccessibility
-  studentAccessType: StudentAccessType;
-  academicStage: number; // 1, 2, 3, 4 for stages
+  course: Course; 
+  studentAccessType: StudentAccessType[];
+  academicStage: number[]; 
   canAccessIfPurchased: boolean;
-  groups: Group[]; // Relation: AccessibilityGroups
+  groups: Group[]; 
 }
 
 export interface Part {
@@ -169,9 +169,10 @@ export enum Gender {
 export interface AccessibilitySettings {
   id: string;
   courseId: string;
-  studentAccessType: StudentAccessType;
-  academicStage: number;
+  studentAccessType: StudentAccessType[];
+  academicStage: number[];
   canAccessIfPurchased: boolean;
+  broughtFromTeacherId:string
 }
 
 export interface Part {
@@ -235,10 +236,11 @@ export interface UpdateCourseInput {
 }
 
 export interface UpdateAccessibilitySettingsInput {
-  studentAccessType: StudentAccessType;
+  studentAccessType: StudentAccessType[];
   academicStage: number;
   canAccessIfPurchased: boolean;
   isFree: boolean;
+  broughtFromTeacherId : string
 }
 
 

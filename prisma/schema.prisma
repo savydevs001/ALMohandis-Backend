@@ -16,19 +16,22 @@ model User {
   enrolledCourses  Course[]           @relation("EnrolledCourses")
 }
 
+
 model Teacher {
-  id          String   @id @default(cuid())
-  fullName    String
-  gender      Gender
-  joiningDate DateTime
-  email       String   @unique
-  password    String
-  dateOfBirth DateTime
-  phone       String
-  department  String
-  level       Int
-  experience  Int
-  courses     Course[] @relation("TeacherCourses")
+  id                    String                  @id @default(cuid())
+  fullName              String
+  gender                Gender
+  joiningDate           DateTime
+  email                 String                  @unique
+  password              String
+  dateOfBirth           DateTime
+  phone                 String
+  department            String
+  level                 Int
+  experience            Int
+  courses               Course[]                @relation("TeacherCourses") // Teacher creates courses
+
+  accessibilitySettings AccessibilitySettings[]   @relation("TeacherAccessibility")
 }
 
 model CoursesPurchased {
@@ -66,14 +69,18 @@ enum Gender {
 }
 
 model AccessibilitySettings {
-  id                   String            @id @default(cuid())
-  courseId             String            @unique
-  course               Course            @relation("CourseAccessibility", fields: [courseId], references: [id])
-  studentAccessType    StudentAccessType
-  academicStage        Int // 1, 2, 3, 4 for stages
-  canAccessIfPurchased Boolean           @default(false)
-  groups               Group[]           @relation("AccessibilityGroups")
+  id                   String                @id @default(cuid())
+  courseId             String                @unique
+  course               Course                @relation("CourseAccessibility", fields: [courseId], references: [id])
+  studentAccessType    StudentAccessType[]   // This is now an array
+  academicStage        Int[]                 // Changed to an array
+  canAccessIfPurchased Boolean               @default(false)
+  groups               Group[]               @relation("AccessibilityGroups")
+
+  broughtFromTeacherId String
+  broughtFrom          Teacher               @relation("TeacherAccessibility", fields: [broughtFromTeacherId], references: [id])
 }
+
 
 model Part {
   id             String   @id @default(cuid())

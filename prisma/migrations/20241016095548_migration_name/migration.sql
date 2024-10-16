@@ -1,4 +1,7 @@
 -- CreateEnum
+CREATE TYPE "Gender" AS ENUM ('MALE', 'FEMALE');
+
+-- CreateEnum
 CREATE TYPE "UserRole" AS ENUM ('TEACHER', 'STUDENT');
 
 -- CreateEnum
@@ -10,6 +13,9 @@ CREATE TYPE "ModuleType" AS ENUM ('CHAPTER', 'EXAM', 'ASSIGNMENT', 'ATTACHMENT')
 -- CreateEnum
 CREATE TYPE "AnswerType" AS ENUM ('MCQ', 'TRUE_FALSE', 'SHORT_ANSWER');
 
+-- CreateEnum
+CREATE TYPE "LessonType" AS ENUM ('AUDIO', 'VIDEO');
+
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
@@ -18,6 +24,23 @@ CREATE TABLE "User" (
     "role" "UserRole" NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Teacher" (
+    "id" TEXT NOT NULL,
+    "fullName" TEXT NOT NULL,
+    "gender" "Gender" NOT NULL,
+    "joiningDate" TIMESTAMP(3) NOT NULL,
+    "email" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+    "dateOfBirth" TIMESTAMP(3) NOT NULL,
+    "phone" TEXT NOT NULL,
+    "department" TEXT NOT NULL,
+    "level" INTEGER NOT NULL,
+    "experience" INTEGER NOT NULL,
+
+    CONSTRAINT "Teacher_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -35,7 +58,11 @@ CREATE TABLE "Course" (
     "title" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "isFree" BOOLEAN NOT NULL DEFAULT false,
-    "objectives" TEXT[],
+    "isActive" BOOLEAN NOT NULL DEFAULT false,
+    "isDraft" BOOLEAN NOT NULL DEFAULT true,
+    "waitingForReview" BOOLEAN NOT NULL DEFAULT false,
+    "objectives" TEXT,
+    "whatYouWillLearn" TEXT,
     "instructorId" TEXT NOT NULL,
 
     CONSTRAINT "Course_pkey" PRIMARY KEY ("id")
@@ -45,9 +72,10 @@ CREATE TABLE "Course" (
 CREATE TABLE "AccessibilitySettings" (
     "id" TEXT NOT NULL,
     "courseId" TEXT NOT NULL,
-    "studentAccessType" "StudentAccessType" NOT NULL,
-    "academicStage" INTEGER NOT NULL,
+    "studentAccessType" "StudentAccessType"[],
+    "academicStage" INTEGER[],
     "canAccessIfPurchased" BOOLEAN NOT NULL DEFAULT false,
+    "broughtFromTeacherId" TEXT NOT NULL,
 
     CONSTRAINT "AccessibilitySettings_pkey" PRIMARY KEY ("id")
 );
@@ -78,12 +106,24 @@ CREATE TABLE "Module" (
 CREATE TABLE "Lesson" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
-    "videoUrl" TEXT,
-    "audioUrl" TEXT,
+    "description" TEXT NOT NULL,
+    "type" "LessonType" NOT NULL,
+    "srcUrl" TEXT NOT NULL,
     "moduleId" TEXT NOT NULL,
     "isPromotional" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "Lesson_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Clip" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "start" INTEGER NOT NULL,
+    "end" INTEGER NOT NULL,
+    "lessonId" TEXT NOT NULL,
+
+    CONSTRAINT "Clip_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -144,6 +184,12 @@ CREATE TABLE "_GroupCourse" (
 );
 
 -- CreateTable
+CREATE TABLE "_EnrolledCourses" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL
+);
+
+-- CreateTable
 CREATE TABLE "_AccessibilityGroups" (
     "A" TEXT NOT NULL,
     "B" TEXT NOT NULL
@@ -153,6 +199,9 @@ CREATE TABLE "_AccessibilityGroups" (
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Teacher_email_key" ON "Teacher"("email");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "AccessibilitySettings_courseId_key" ON "AccessibilitySettings"("courseId");
 
 -- CreateIndex
@@ -160,6 +209,12 @@ CREATE UNIQUE INDEX "_GroupCourse_AB_unique" ON "_GroupCourse"("A", "B");
 
 -- CreateIndex
 CREATE INDEX "_GroupCourse_B_index" ON "_GroupCourse"("B");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_EnrolledCourses_AB_unique" ON "_EnrolledCourses"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_EnrolledCourses_B_index" ON "_EnrolledCourses"("B");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "_AccessibilityGroups_AB_unique" ON "_AccessibilityGroups"("A", "B");
@@ -174,10 +229,13 @@ ALTER TABLE "CoursesPurchased" ADD CONSTRAINT "CoursesPurchased_userId_fkey" FOR
 ALTER TABLE "CoursesPurchased" ADD CONSTRAINT "CoursesPurchased_courseId_fkey" FOREIGN KEY ("courseId") REFERENCES "Course"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Course" ADD CONSTRAINT "Course_instructorId_fkey" FOREIGN KEY ("instructorId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Course" ADD CONSTRAINT "Course_instructorId_fkey" FOREIGN KEY ("instructorId") REFERENCES "Teacher"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "AccessibilitySettings" ADD CONSTRAINT "AccessibilitySettings_courseId_fkey" FOREIGN KEY ("courseId") REFERENCES "Course"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AccessibilitySettings" ADD CONSTRAINT "AccessibilitySettings_broughtFromTeacherId_fkey" FOREIGN KEY ("broughtFromTeacherId") REFERENCES "Teacher"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Part" ADD CONSTRAINT "Part_courseId_fkey" FOREIGN KEY ("courseId") REFERENCES "Course"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -190,6 +248,9 @@ ALTER TABLE "Module" ADD CONSTRAINT "Module_courseId_fkey" FOREIGN KEY ("courseI
 
 -- AddForeignKey
 ALTER TABLE "Lesson" ADD CONSTRAINT "Lesson_moduleId_fkey" FOREIGN KEY ("moduleId") REFERENCES "Module"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Clip" ADD CONSTRAINT "Clip_lessonId_fkey" FOREIGN KEY ("lessonId") REFERENCES "Lesson"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Assignment" ADD CONSTRAINT "Assignment_moduleId_fkey" FOREIGN KEY ("moduleId") REFERENCES "Module"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -214,6 +275,12 @@ ALTER TABLE "_GroupCourse" ADD CONSTRAINT "_GroupCourse_A_fkey" FOREIGN KEY ("A"
 
 -- AddForeignKey
 ALTER TABLE "_GroupCourse" ADD CONSTRAINT "_GroupCourse_B_fkey" FOREIGN KEY ("B") REFERENCES "Group"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_EnrolledCourses" ADD CONSTRAINT "_EnrolledCourses_A_fkey" FOREIGN KEY ("A") REFERENCES "Course"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_EnrolledCourses" ADD CONSTRAINT "_EnrolledCourses_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_AccessibilityGroups" ADD CONSTRAINT "_AccessibilityGroups_A_fkey" FOREIGN KEY ("A") REFERENCES "AccessibilitySettings"("id") ON DELETE CASCADE ON UPDATE CASCADE;

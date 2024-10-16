@@ -136,7 +136,7 @@ export const deleteCourse = async (req: Request, res: Response) => {
 // -----------------------
 export const updateAccessibilitySettings = async (req: Request, res: Response) => {
   const { courseId } = req.params;
-  const { studentAccessType, academicStage, canAccessIfPurchased , isFree }: UpdateAccessibilitySettingsInput = req.body;
+  const { studentAccessType, academicStage, canAccessIfPurchased , isFree , broughtFromTeacherId }: UpdateAccessibilitySettingsInput = req.body;
 
   try {
     // Check if the course exists
@@ -168,8 +168,9 @@ export const updateAccessibilitySettings = async (req: Request, res: Response) =
         where: { courseId },
         data: {
           studentAccessType: studentAccessType ?? existingSettings.studentAccessType,
-          academicStage: academicStage ?? existingSettings.academicStage,
+          academicStage: Array.isArray(academicStage) ? academicStage : existingSettings.academicStage,
           canAccessIfPurchased: canAccessIfPurchased ?? existingSettings.canAccessIfPurchased,
+          broughtFromTeacherId: broughtFromTeacherId ?? existingSettings.broughtFromTeacherId,
         },
       });
       res.status(200).json(updatedSettings);
@@ -179,8 +180,9 @@ export const updateAccessibilitySettings = async (req: Request, res: Response) =
         data: {
           courseId,
           studentAccessType,
-          academicStage,
+          academicStage: Array.isArray(academicStage) ? academicStage : [academicStage],
           canAccessIfPurchased,
+          broughtFromTeacherId,
         },
       });
       res.status(201).json(accessibility);
